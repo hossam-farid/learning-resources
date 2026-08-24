@@ -8,8 +8,6 @@ import validateQuickstart from './quickstartValidation';
 import { getQuickstartsStore, QuickstartsStoreState } from './quickstartsStore';
 import { LazyQuickStartCatalog } from './LazyQuickStartCatalog';
 
-import '@patternfly/quickstarts/dist/quickstarts.min.css';
-
 /**
  * Subscribe to the Scalprum shared store without importing `@scalprum/react-core`.
  * That package's barrel also exports ScalprumComponent/LoadModule. Importing it from
