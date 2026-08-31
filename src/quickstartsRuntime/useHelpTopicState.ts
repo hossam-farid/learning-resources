@@ -22,7 +22,10 @@ type HelpTopicsAction = {
   active?: boolean;
 };
 
-const helpTopicsReducer: Reducer<HelpTopicsState, HelpTopicsAction> = (state, action) => {
+const helpTopicsReducer: Reducer<HelpTopicsState, HelpTopicsAction> = (
+  state,
+  action
+) => {
   switch (action.type) {
     case 'setActiveTopics':
       return {
@@ -52,7 +55,9 @@ const helpTopicsReducer: Reducer<HelpTopicsState, HelpTopicsAction> = (state, ac
   }
 };
 
-const useHelpTopicState = (initialState: Partial<HelpTopicsState> = { activeTopics: {}, helpTopics: {} }) => {
+const useHelpTopicState = (
+  initialState: Partial<HelpTopicsState> = { activeTopics: {}, helpTopics: {} }
+) => {
   const [state, dispatch] = useReducer(helpTopicsReducer, {
     activeTopics: initialState.activeTopics || {},
     helpTopics: initialState.helpTopics || {},
@@ -62,76 +67,104 @@ const useHelpTopicState = (initialState: Partial<HelpTopicsState> = { activeTopi
     dispatch({ type: 'setActiveTopics', activeTopics: names, active });
   }, []);
 
-  function appendQueryArray(params: URLSearchParams, name: string, values: string[]) {
+  function appendQueryArray(
+    params: URLSearchParams,
+    name: string,
+    values: string[]
+  ) {
     values.forEach((value) => {
       params.append(name, value);
     });
     return params;
   }
 
-  const addHelpTopics: AddHelpTopic = useCallback((topics: HelpTopic[], enabled = true) => {
-    dispatch({ type: 'setHelpTopics', helpTopics: topics });
-    batchToggleTopic(
-      topics.map(({ name }) => name),
-      enabled
-    );
-  }, [batchToggleTopic]);
+  const addHelpTopics: AddHelpTopic = useCallback(
+    (topics: HelpTopic[], enabled = true) => {
+      dispatch({ type: 'setHelpTopics', helpTopics: topics });
+      batchToggleTopic(
+        topics.map(({ name }) => name),
+        enabled
+      );
+    },
+    [batchToggleTopic]
+  );
 
-  const fetchHelpTopics = useCallback(async ({
-    bundles = [],
-    applications = [],
-    names = [],
-    enabled = true,
-  }: {
-    enabled?: boolean;
-    bundles?: string[];
-    applications?: string[];
-    names?: string[];
-  }) => {
-    let params = new URLSearchParams('');
-    params = appendQueryArray(params, 'bundle', bundles);
-    params = appendQueryArray(params, 'application', applications);
-    params = appendQueryArray(params, 'name', names);
+  const fetchHelpTopics = useCallback(
+    async ({
+      bundles = [],
+      applications = [],
+      names = [],
+      enabled = true,
+    }: {
+      enabled?: boolean;
+      bundles?: string[];
+      applications?: string[];
+      names?: string[];
+    }) => {
+      let params = new URLSearchParams('');
+      params = appendQueryArray(params, 'bundle', bundles);
+      params = appendQueryArray(params, 'application', applications);
+      params = appendQueryArray(params, 'name', names);
 
-    try {
-      const { data } = await axios.get<{ content: HelpTopic }[]>(`/api/quickstarts/v1/helptopics?${params.toString()}`);
-      const content = data.map(({ content }) => content);
-      addHelpTopics(content, enabled);
-      return content;
-    } catch (error) {
-      console.error('Unable to fetch help topics', error);
-      return [];
-    }
-  }, [addHelpTopics]);
-
-  const enableTopics: EnableTopics = useCallback((...topicsNames: string[]) => {
-    const newTopics: string[] = [];
-    const existingTopics: string[] = [];
-    topicsNames.forEach((name) => {
-      if (typeof state.helpTopics[name] === 'undefined') {
-        newTopics.push(name);
-      } else {
-        existingTopics.push(name);
+      try {
+        const { data } = await axios.get<{ content: HelpTopic }[]>(
+          `/api/quickstarts/v1/helptopics?${params.toString()}`
+        );
+        const content = data.map(({ content }) => content);
+        addHelpTopics(content, enabled);
+        return content;
+      } catch (error) {
+        console.error('Unable to fetch help topics', error);
+        return [];
       }
-    });
-    const tasks = [];
-    if (newTopics.length > 0) {
-      tasks.push(fetchHelpTopics({ enabled: true, names: newTopics }));
-    }
-    const existingContent: HelpTopic[] = Object.entries(state.helpTopics).reduce<HelpTopic[]>(
-      (acc, [name, topic]) => [...acc, ...(topicsNames.includes(name) ? [topic] : [])],
-      []
-    );
-    batchToggleTopic(existingTopics, true);
-    return Promise.all(tasks).then((res) => [...res.flat(), ...existingContent]);
-  }, [state.helpTopics, fetchHelpTopics, batchToggleTopic]);
+    },
+    [addHelpTopics]
+  );
 
-  const disableTopics: DisableTopics = useCallback((...topicsNames: string[]) => {
-    batchToggleTopic(topicsNames, false);
-  }, [batchToggleTopic]);
+  const enableTopics: EnableTopics = useCallback(
+    (...topicsNames: string[]) => {
+      const newTopics: string[] = [];
+      const existingTopics: string[] = [];
+      topicsNames.forEach((name) => {
+        if (typeof state.helpTopics[name] === 'undefined') {
+          newTopics.push(name);
+        } else {
+          existingTopics.push(name);
+        }
+      });
+      const tasks = [];
+      if (newTopics.length > 0) {
+        tasks.push(fetchHelpTopics({ enabled: true, names: newTopics }));
+      }
+      const existingContent: HelpTopic[] = Object.entries(
+        state.helpTopics
+      ).reduce<HelpTopic[]>(
+        (acc, [name, topic]) => [
+          ...acc,
+          ...(topicsNames.includes(name) ? [topic] : []),
+        ],
+        []
+      );
+      batchToggleTopic(existingTopics, true);
+      return Promise.all(tasks).then((res) => [
+        ...res.flat(),
+        ...existingContent,
+      ]);
+    },
+    [state.helpTopics, fetchHelpTopics, batchToggleTopic]
+  );
+
+  const disableTopics: DisableTopics = useCallback(
+    (...topicsNames: string[]) => {
+      batchToggleTopic(topicsNames, false);
+    },
+    [batchToggleTopic]
+  );
 
   return {
-    helpTopics: Object.values(state.helpTopics).filter(({ name }) => state.activeTopics?.[name]),
+    helpTopics: Object.values(state.helpTopics).filter(
+      ({ name }) => state.activeTopics?.[name]
+    ),
     addHelpTopics,
     disableTopics,
     enableTopics,

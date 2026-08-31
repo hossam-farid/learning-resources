@@ -3,7 +3,9 @@ import { renderToStaticMarkup } from 'react-dom/server';
 
 function registerQuickstartLinkClickListener() {
   function listener(event: Event) {
-    const { state } = event as unknown as { state?: { quickstartLink?: boolean } };
+    const { state } = event as unknown as {
+      state?: { quickstartLink?: boolean };
+    };
     const isQuickstartLink = state?.quickstartLink;
     if (isQuickstartLink) {
       window.dispatchEvent(new PopStateEvent('popstate'));
@@ -67,7 +69,9 @@ function useQuickstartLinkStore() {
   };
 }
 
-export function createQuickstartLinkMarkupExtension(quickstartLinkStore: ReturnType<typeof useQuickstartLinkStore>) {
+export function createQuickstartLinkMarkupExtension(
+  quickstartLinkStore: ReturnType<typeof useQuickstartLinkStore>
+) {
   return {
     type: 'lang',
     regex: /\[.*\]\(.*\)/g,

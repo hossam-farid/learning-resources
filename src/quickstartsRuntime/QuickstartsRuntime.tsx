@@ -1,11 +1,27 @@
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { HelpTopic, HelpTopicContainer, QuickStart, QuickStartContainer, QuickStartContainerProps, HelpTopicContext } from '@patternfly/quickstarts';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import {
+  HelpTopic,
+  HelpTopicContainer,
+  HelpTopicContext,
+  QuickStart,
+  QuickStartContainer,
+  QuickStartContainerProps,
+} from '@patternfly/quickstarts';
 import useQuickstartsStates from './useQuickstartsStates';
 import useHelpTopicState from './useHelpTopicState';
 import useHelpTopicManager from './useHelpTopicManager';
-import useQuickstartLinkStore, { createQuickstartLinkMarkupExtension } from './useQuickstartLinkStore';
+import useQuickstartLinkStore, {
+  createQuickstartLinkMarkupExtension,
+} from './useQuickstartLinkStore';
 import validateQuickstart from './quickstartValidation';
-import { getQuickstartsStore, QuickstartsStoreState } from './quickstartsStore';
+import { QuickstartsStoreState, getQuickstartsStore } from './quickstartsStore';
 import { LazyQuickStartCatalog } from './LazyQuickStartCatalog';
 
 /**
@@ -14,9 +30,14 @@ import { LazyQuickStartCatalog } from './LazyQuickStartCatalog';
  * this federated module (which Chrome loads *via* ScalprumComponent) creates a
  * webpack TDZ cycle: `Cannot access '__WEBPACK_DEFAULT_EXPORT__' before initialization`.
  */
-function useQuickstartsStoreState(store: ReturnType<typeof getQuickstartsStore>): QuickstartsStoreState {
+function useQuickstartsStoreState(
+  store: ReturnType<typeof getQuickstartsStore>
+): QuickstartsStoreState {
   const [state, setState] = useState(() => store.getState());
-  useEffect(() => store.subscribeAll(() => setState(store.getState())), [store]);
+  useEffect(
+    () => store.subscribeAll(() => setState(store.getState())),
+    [store]
+  );
   return state;
 }
 
@@ -24,7 +45,10 @@ export interface QuickstartsRuntimeProps {
   accountId?: string;
   activeModule?: string;
   children?: React.ReactNode;
-  onApiReady?: (api: { quickstartsAPI: QuickstartsAPI; helpTopicsAPI: FullHelpTopicsAPI }) => void;
+  onApiReady?: (api: {
+    quickstartsAPI: QuickstartsAPI;
+    helpTopicsAPI: FullHelpTopicsAPI;
+  }) => void;
   onActiveQuickStartChanged?: (id: string) => void;
 }
 
@@ -76,7 +100,12 @@ const ApiPublisher: React.FC<{
         internalFilteredTopics.current = shouldAppend
           ? [
               ...internalFilteredTopics.current,
-              ...res.filter((topic) => !internalFilteredTopics.current.find(({ name }) => name === topic.name)),
+              ...res.filter(
+                (topic) =>
+                  !internalFilteredTopics.current.find(
+                    ({ name }) => name === topic.name
+                  )
+              ),
             ]
           : res;
         setFilteredHelpTopics?.(internalFilteredTopics.current);
@@ -89,7 +118,9 @@ const ApiPublisher: React.FC<{
   const disableTopics = useCallback(
     (...topicsNames: string[]) => {
       baseHelpTopicsAPI.disableTopics(...topicsNames);
-      internalFilteredTopics.current = internalFilteredTopics.current.filter((topic) => !topicsNames.includes(topic.name));
+      internalFilteredTopics.current = internalFilteredTopics.current.filter(
+        (topic) => !topicsNames.includes(topic.name)
+      );
       setFilteredHelpTopics?.(internalFilteredTopics.current);
     },
     [baseHelpTopicsAPI, setFilteredHelpTopics]
@@ -107,7 +138,13 @@ const ApiPublisher: React.FC<{
       setActiveTopic,
       closeHelpTopic,
     }),
-    [baseHelpTopicsAPI.addHelpTopics, enableTopics, disableTopics, setActiveTopic, closeHelpTopic]
+    [
+      baseHelpTopicsAPI.addHelpTopics,
+      enableTopics,
+      disableTopics,
+      setActiveTopic,
+      closeHelpTopic,
+    ]
   );
 
   useEffect(() => {
@@ -130,12 +167,20 @@ export default function QuickstartsRuntime({
 }: QuickstartsRuntimeProps) {
   const quickstartsStore = getQuickstartsStore();
   const quickstartLinkStore = useQuickstartLinkStore();
-  const { activateQuickstart, allQuickStartStates, setAllQuickStartStates, activeQuickStartID, setActiveQuickStartID } =
-    useQuickstartsStates(accountId);
+  const {
+    activateQuickstart,
+    allQuickStartStates,
+    setAllQuickStartStates,
+    activeQuickStartID,
+    setActiveQuickStartID,
+  } = useQuickstartsStates(accountId);
   const baseHelpTopicsAPI = useHelpTopicState();
 
   const storeState = useQuickstartsStoreState(quickstartsStore);
-  const quickStarts = useMemo(() => Object.values(storeState.quickstarts).flat(), [storeState.quickstarts]);
+  const quickStarts = useMemo(
+    () => Object.values(storeState.quickstarts).flat(),
+    [storeState.quickstarts]
+  );
 
   useEffect(() => {
     quickstartsStore.updateState('CLEAR_QUICKSTARTS', activeQuickStartID);
@@ -147,7 +192,10 @@ export default function QuickstartsRuntime({
 
   const updateQuickStarts = useCallback(
     (key: string, qs: QuickStart[]) => {
-      quickstartsStore.updateState('POPULATE_QUICKSTARTS', { app: key, quickstarts: qs });
+      quickstartsStore.updateState('POPULATE_QUICKSTARTS', {
+        app: key,
+        quickstarts: qs,
+      });
     },
     [quickstartsStore]
   );
@@ -155,7 +203,10 @@ export default function QuickstartsRuntime({
   const addQuickstart = useCallback(
     (key: string, qs: QuickStart): boolean => {
       if (validateQuickstart(key, qs)) {
-        quickstartsStore.updateState('ADD_QUICKSTART', { app: key, quickstart: qs });
+        quickstartsStore.updateState('ADD_QUICKSTART', {
+          app: key,
+          quickstart: qs,
+        });
         return true;
       }
       return false;
@@ -173,15 +224,22 @@ export default function QuickstartsRuntime({
       Catalog: LazyQuickStartCatalog,
       updateQuickStarts,
     }),
-    [activateQuickstart, setActiveQuickStartID, updateQuickStarts, addQuickstart]
+    [
+      activateQuickstart,
+      setActiveQuickStartID,
+      updateQuickStarts,
+      addQuickstart,
+    ]
   );
 
   const quickStartProps: QuickStartContainerProps = {
     quickStarts,
     activeQuickStartID,
     allQuickStartStates,
-    setActiveQuickStartID: setActiveQuickStartID as QuickStartContainerProps['setActiveQuickStartID'],
-    setAllQuickStartStates: setAllQuickStartStates as unknown as QuickStartContainerProps['setAllQuickStartStates'],
+    setActiveQuickStartID:
+      setActiveQuickStartID as QuickStartContainerProps['setActiveQuickStartID'],
+    setAllQuickStartStates:
+      setAllQuickStartStates as unknown as QuickStartContainerProps['setAllQuickStartStates'],
     showCardFooters: false,
     language: 'en',
     alwaysShowTaskReview: true,

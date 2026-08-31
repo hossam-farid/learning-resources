@@ -1,6 +1,10 @@
 import { Reducer, useContext, useEffect, useReducer } from 'react';
 import { HelpTopicContext } from '@patternfly/quickstarts';
-import type { AddHelpTopic, DisableTopics, EnableTopics } from './useHelpTopicState';
+import type {
+  AddHelpTopic,
+  DisableTopics,
+  EnableTopics,
+} from './useHelpTopicState';
 
 export type HelpTopicsAPI = {
   addHelpTopics: AddHelpTopic;
@@ -14,7 +18,12 @@ type HelpTopicState = {
   internalTopicsSwitch: boolean;
 };
 
-type HelpTopicActions = 'clearActiveTopic' | 'setActiveTopic' | 'setActiveTopicExternal' | 'setActiveTopicInternal' | 'resetActiveTopic';
+type HelpTopicActions =
+  | 'clearActiveTopic'
+  | 'setActiveTopic'
+  | 'setActiveTopicExternal'
+  | 'setActiveTopicInternal'
+  | 'resetActiveTopic';
 
 type HelpTopicAction = {
   type: HelpTopicActions;
@@ -22,7 +31,10 @@ type HelpTopicAction = {
   prevActiveTopic?: string;
 };
 
-const helpTopicsReducer: Reducer<HelpTopicState, HelpTopicAction> = (state, action) => {
+const helpTopicsReducer: Reducer<HelpTopicState, HelpTopicAction> = (
+  state,
+  action
+) => {
   switch (action.type) {
     case 'setActiveTopic':
       return {
@@ -56,13 +68,18 @@ const helpTopicsReducer: Reducer<HelpTopicState, HelpTopicAction> = (state, acti
 };
 
 const useHelpTopicManager = (helpTopicsAPI: HelpTopicsAPI) => {
-  const [{ activeTopicName, internalTopicsSwitch, prevActiveTopic }, dispatch] = useReducer(helpTopicsReducer, {
-    internalTopicsSwitch: false,
-  });
+  const [{ activeTopicName, internalTopicsSwitch, prevActiveTopic }, dispatch] =
+    useReducer(helpTopicsReducer, {
+      internalTopicsSwitch: false,
+    });
 
-  const { setActiveHelpTopicByName, helpTopics, activeHelpTopic } = useContext(HelpTopicContext);
+  const { setActiveHelpTopicByName, helpTopics, activeHelpTopic } =
+    useContext(HelpTopicContext);
 
-  async function setActiveTopic(activeTopicName: string, prevActiveTopic?: string) {
+  async function setActiveTopic(
+    activeTopicName: string,
+    prevActiveTopic?: string
+  ) {
     dispatch({ type: 'setActiveTopic', activeTopicName, prevActiveTopic });
     if (activeTopicName?.length > 0) {
       helpTopicsAPI.enableTopics(activeTopicName);
@@ -73,13 +90,23 @@ const useHelpTopicManager = (helpTopicsAPI: HelpTopicsAPI) => {
     if (prevActiveTopic && activeHelpTopic === null) {
       setActiveTopic('', undefined);
     } else {
-      if (activeHelpTopic?.name && prevActiveTopic === activeTopicName && activeHelpTopic?.name !== activeTopicName) {
+      if (
+        activeHelpTopic?.name &&
+        prevActiveTopic === activeTopicName &&
+        activeHelpTopic?.name !== activeTopicName
+      ) {
         setActiveHelpTopicByName?.(activeHelpTopic.name);
         dispatch({ type: 'setActiveTopicInternal', prevActiveTopic });
-      } else if (typeof activeTopicName === 'string' && activeTopicName?.length > 0) {
+      } else if (
+        typeof activeTopicName === 'string' &&
+        activeTopicName?.length > 0
+      ) {
         if (helpTopics?.find(({ name }) => name === activeTopicName)) {
           setActiveHelpTopicByName?.(activeTopicName);
-          dispatch({ type: 'setActiveTopicExternal', prevActiveTopic: activeTopicName });
+          dispatch({
+            type: 'setActiveTopicExternal',
+            prevActiveTopic: activeTopicName,
+          });
         }
       } else {
         setActiveHelpTopicByName?.('');

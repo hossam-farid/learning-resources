@@ -13,7 +13,9 @@ const EVENTS = [
   'TOGGLE_DISABLED',
 ] as const;
 
-let store: ReturnType<typeof createSharedStore<QuickstartsStoreState, typeof EVENTS>> | null = null;
+let store: ReturnType<
+  typeof createSharedStore<QuickstartsStoreState, typeof EVENTS>
+> | null = null;
 
 export function getQuickstartsStore() {
   if (!store) {
@@ -23,11 +25,14 @@ export function getQuickstartsStore() {
       onEventChange: (
         state: QuickstartsStoreState,
         event: (typeof EVENTS)[number],
-        payload?: any
+        payload?: unknown
       ): QuickstartsStoreState => {
         switch (event) {
           case 'POPULATE_QUICKSTARTS': {
-            const { app, quickstarts } = payload as { app: string; quickstarts: QuickStart[] };
+            const { app, quickstarts } = payload as {
+              app: string;
+              quickstarts: QuickStart[];
+            };
             return {
               ...state,
               quickstarts: {
@@ -37,7 +42,10 @@ export function getQuickstartsStore() {
             };
           }
           case 'ADD_QUICKSTART': {
-            const { app, quickstart } = payload as { app: string; quickstart: QuickStart };
+            const { app, quickstart } = payload as {
+              app: string;
+              quickstart: QuickStart;
+            };
             return {
               ...state,
               quickstarts: {
@@ -48,20 +56,25 @@ export function getQuickstartsStore() {
           }
           case 'CLEAR_QUICKSTARTS': {
             const activeQuickstart = payload as string | undefined;
-            const cleared = Object.entries(state.quickstarts).reduce<{ [key: string]: QuickStart[] }>(
-              (acc, [namespace, quickstarts]) => {
-                const kept = quickstarts.filter((qs) => qs?.metadata?.name === activeQuickstart);
-                if (kept.length > 0) {
-                  acc[namespace] = kept;
-                }
-                return acc;
-              },
-              {}
-            );
+            const cleared = Object.entries(state.quickstarts).reduce<{
+              [key: string]: QuickStart[];
+            }>((acc, [namespace, quickstarts]) => {
+              const kept = quickstarts.filter(
+                (qs) => qs?.metadata?.name === activeQuickstart
+              );
+              if (kept.length > 0) {
+                acc[namespace] = kept;
+              }
+              return acc;
+            }, {});
             return { ...state, quickstarts: cleared };
           }
           case 'TOGGLE_DISABLED':
-            return { ...state, disabled: payload ?? !state.disabled };
+            return {
+              ...state,
+              disabled:
+                typeof payload === 'boolean' ? payload : !state.disabled,
+            };
           default:
             return state;
         }

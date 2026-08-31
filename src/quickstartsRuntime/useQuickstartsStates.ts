@@ -10,12 +10,19 @@ interface QuickStartAPIResponse {
 const useQuickstartsStates = (accountId?: string) => {
   const quickstartsStore = getQuickstartsStore();
 
-  const [allQuickStartStates, setAllQuickStartStatesInternal] = useState<{ [key: string | number]: QuickStartState }>({});
+  const [allQuickStartStates, setAllQuickStartStatesInternal] = useState<{
+    [key: string | number]: QuickStartState;
+  }>({});
   const [activeQuickStartID, setActiveQuickStartIDInternal] = useState('');
 
   const setAllQuickStartStates = useCallback(
-    (value: QuickStartState | ((states: typeof allQuickStartStates) => QuickStartState)) => {
-      const valueToStore = typeof value === 'function' ? value(allQuickStartStates) : value;
+    (
+      value:
+        | QuickStartState
+        | ((states: typeof allQuickStartStates) => QuickStartState)
+    ) => {
+      const valueToStore =
+        typeof value === 'function' ? value(allQuickStartStates) : value;
       const activeState = valueToStore[activeQuickStartID];
 
       if (typeof activeState === 'object') {
@@ -26,10 +33,15 @@ const useQuickstartsStates = (accountId?: string) => {
             progress: activeState,
           })
           .catch((err) => {
-            console.error(`Unable to persis quickstart progress! ${activeQuickStartID}`, err);
+            console.error(
+              `Unable to persis quickstart progress! ${activeQuickStartID}`,
+              err
+            );
           });
       }
-      setAllQuickStartStatesInternal(value as unknown as typeof allQuickStartStates);
+      setAllQuickStartStatesInternal(
+        value as unknown as typeof allQuickStartStates
+      );
     },
     [setAllQuickStartStatesInternal, activeQuickStartID, accountId]
   );
@@ -49,11 +61,14 @@ const useQuickstartsStates = (accountId?: string) => {
   useEffect(() => {
     if (accountId) {
       axios
-        .get<{ data: { quickstartName: string; progress: QuickStartState }[] }>('/api/quickstarts/v1/progress', {
-          params: {
-            account: accountId,
-          },
-        })
+        .get<{ data: { quickstartName: string; progress: QuickStartState }[] }>(
+          '/api/quickstarts/v1/progress',
+          {
+            params: {
+              account: accountId,
+            },
+          }
+        )
         .then(({ data: { data } }) => {
           const states = data.reduce(
             (acc, curr) => ({
@@ -82,27 +97,40 @@ const useQuickstartsStates = (accountId?: string) => {
       try {
         const {
           data: { data },
-        } = await axios.get<QuickStartAPIResponse>('/api/quickstarts/v1/quickstarts', {
-          params: {
-            name,
-          },
-        });
+        } = await axios.get<QuickStartAPIResponse>(
+          '/api/quickstarts/v1/quickstarts',
+          {
+            params: {
+              name,
+            },
+          }
+        );
         const mainQuickstarts = data.map(({ content }) => content);
 
-        const nextQuickStartNames = mainQuickstarts.flatMap((qs) => qs.spec.nextQuickStart || []).filter((name, index, arr) => arr.indexOf(name) === index);
+        const nextQuickStartNames = mainQuickstarts
+          .flatMap((qs) => qs.spec.nextQuickStart || [])
+          .filter((name, index, arr) => arr.indexOf(name) === index);
 
         let nextQuickstarts: QuickStart[] = [];
         if (nextQuickStartNames.length > 0) {
           try {
             const promises = nextQuickStartNames.map((nextName) =>
-              axios.get<QuickStartAPIResponse>('/api/quickstarts/v1/quickstarts', {
-                params: { name: nextName },
-              })
+              axios.get<QuickStartAPIResponse>(
+                '/api/quickstarts/v1/quickstarts',
+                {
+                  params: { name: nextName },
+                }
+              )
             );
             const responses = await Promise.all(promises);
-            nextQuickstarts = responses.flatMap((r) => r.data.data.map(({ content }) => content));
+            nextQuickstarts = responses.flatMap((r) =>
+              r.data.data.map(({ content }) => content)
+            );
           } catch (error) {
-            console.warn('Some referenced quickstarts could not be fetched:', error);
+            console.warn(
+              'Some referenced quickstarts could not be fetched:',
+              error
+            );
           }
         }
 
@@ -135,7 +163,13 @@ const useQuickstartsStates = (accountId?: string) => {
       activeQuickStartID,
       setActiveQuickStartID,
     }),
-    [activateQuickstart, allQuickStartStates, setAllQuickStartStates, activeQuickStartID, setActiveQuickStartID]
+    [
+      activateQuickstart,
+      allQuickStartStates,
+      setAllQuickStartStates,
+      activeQuickStartID,
+      setActiveQuickStartID,
+    ]
   );
 
   return quickstartState;
