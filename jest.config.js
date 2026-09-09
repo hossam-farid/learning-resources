@@ -11,6 +11,7 @@ module.exports = {
   moduleNameMapper: {
     '\\.(css|scss)$': 'identity-obj-proxy',
     '^chrome/(.*)$': '<rootDir>/src/__mocks__/chrome/$1',
+    '^@scalprum/core$': '<rootDir>/config/scalprumCoreMock.js',
   },
   transformIgnorePatterns,
   setupFilesAfterEnv: ['<rootDir>/config/jest.setup.js'],

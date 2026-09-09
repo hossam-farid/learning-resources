@@ -9,6 +9,8 @@ export {
 } from './useQuickstartLinkStore';
 export { LazyQuickStartCatalog } from './LazyQuickStartCatalog';
 export { getQuickstartsStore } from './quickstartsStore';
+export { getHelpTopicsStore } from './helpTopicsStore';
+export { getQuickstartsClient } from './quickstartsClient';
 export type {
   QuickstartsAPI,
   FullHelpTopicsAPI,

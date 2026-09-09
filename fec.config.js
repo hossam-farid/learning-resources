@@ -47,8 +47,6 @@ module.exports = {
       './HelpPanel': path.resolve(__dirname, './src/components/HelpPanel/index.ts'),
       './HelpPanelLink': path.resolve(__dirname, './src/components/HelpPanel/HelpPanelLink.tsx'),
       './QuickstartsRuntime': path.resolve(__dirname, './src/quickstartsRuntime/QuickstartsRuntimeEntry.tsx'),
-      './quickstartsApi': path.resolve(__dirname, './src/quickstartsRuntime/quickstartsApi.ts'),
-      './helpTopicsApi': path.resolve(__dirname, './src/quickstartsRuntime/helpTopicsApi.ts'),
       './QuickStartCatalog': path.resolve(__dirname, './src/quickstartsRuntime/LazyQuickStartCatalog.tsx'),
     },
     exclude: ['react-router-dom'],

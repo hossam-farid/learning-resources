@@ -83,3 +83,8 @@ export function getQuickstartsStore() {
   }
   return store;
 }
+
+/** Test-only: drop the singleton so cases do not leak state. */
+export function resetQuickstartsStore() {
+  store = null;
+}
